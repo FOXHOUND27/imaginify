@@ -1,7 +1,13 @@
 import React, { ReactNode } from "react";
 
 const Layout = ({ children }: { children: ReactNode }) => {
-  return <div>L</div>;
+  return (
+    <main className="rootS">
+      <div className="root-container">
+        <div className="wrapper">{children}</div>
+      </div>
+    </main>
+  );
 };
 
 export default Layout;
