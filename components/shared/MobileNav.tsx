@@ -36,7 +36,7 @@ const MobileNav = () => {
                 className="cursor-pointer"
               />
             </SheetTrigger>
-            <SheetContent className="sheet-content sm:w-64">
+            <SheetContent className="sheet-content sm:w-64 overflow-y-auto">
               <>
                 <Image
                   src="/assets/images/logo-text.svg"
@@ -71,6 +71,9 @@ const MobileNav = () => {
                     </li>
                   );
                 })}
+                <li className="ml-4">
+                  <UserButton showName />
+                </li>
               </ul>
             </SheetContent>
           </Sheet>
