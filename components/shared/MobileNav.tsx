@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/sheet";
 import Link from "next/link";
 import Image from "next/image";
+import { SignIn, UserButton } from "@clerk/nextjs";
 
 const MobileNav = () => {
   return (
@@ -21,6 +22,12 @@ const MobileNav = () => {
           height={28}
         />
       </Link>
+
+      <nav className="flex gap-2">
+        <SignIn>
+          <UserButton showName />
+        </SignIn>
+      </nav>
     </header>
   );
 };
