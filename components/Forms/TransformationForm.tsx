@@ -14,16 +14,41 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { TransformationFormProps } from "@/types";
+import { defaultValues } from "@/data/constants";
 
-const formSchema = z.object({
-  username: z.string().min(2).max(50),
+export const formSchema = z.object({
+  title: z.string(),
+  aspectRatio: z.string().optional(),
+  color: z.string().optional(),
+  prompt: z.string().optional(),
+  publicId: z.string(),
 });
 
-const TransformationForm = () => {
+const TransformationForm = ({
+  action,
+  data = null,
+}: TransformationFormProps) => {
+  // Default form values
+  const initialValues =
+    data && action === "Update"
+      ? {
+          title: data?.title,
+          aspectRatio: data?.aspectRatio,
+          color: data?.color,
+          prompt: data?.prompt,
+          publicId: data?.publicId,
+        }
+      : defaultValues;
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "",
+      title: "",
+      aspectRatio: "",
+      color: "",
+      prompt: "",
+      publicId: "",
     },
   });
   return (
@@ -31,16 +56,14 @@ const TransformationForm = () => {
       <form className="space-y-8">
         <FormField
           control={form.control}
-          name="username"
+          name="title"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Username</FormLabel>
               <FormControl>
                 <Input placeholder="shadcn" {...field} />
               </FormControl>
-              <FormDescription>
-                This is your public display name.
-              </FormDescription>
+
               <FormMessage />
             </FormItem>
           )}
