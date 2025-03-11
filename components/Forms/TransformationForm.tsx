@@ -43,14 +43,9 @@ const TransformationForm = ({
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: "",
-      aspectRatio: "",
-      color: "",
-      prompt: "",
-      publicId: "",
-    },
+    defaultValues: initialValues,
   });
+
   return (
     <Form {...form}>
       <form className="space-y-8">
