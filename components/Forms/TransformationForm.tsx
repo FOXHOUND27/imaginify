@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -14,8 +14,21 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { TransformationFormProps } from "@/types";
-import { defaultValues } from "@/data/constants";
+import { TransformationFormProps, Transformations } from "@/types";
+import {
+  aspectRatioOptions,
+  defaultValues,
+  transformationTypes,
+} from "@/data/constants";
+import { CustomField } from "../shared/CustomField";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { AspectRatioKey } from "@/lib/utils";
 
 // This is the form schema defenition
 export const formSchema = z.object({
@@ -29,7 +42,26 @@ export const formSchema = z.object({
 const TransformationForm = ({
   action,
   data = null,
+  userId,
+  type,
+  creditBalance,
 }: TransformationFormProps) => {
+  // Getting Transformation Type
+  const transformationType = transformationTypes[type];
+
+  // useState for image upload
+  const [image, setImage] = useState(data);
+  const [newTransformation, setNewTransformation] =
+    useState<Transformations | null>(null);
+
+  // Select field handler
+  const onSelectFieldHandler = (
+    value: string,
+    onChangeField: (value: string) => void
+  ) => {
+    const imageSize = aspectRatioOptions[value as AspectRatioKey];
+  };
+
   // Default form values
   const initialValues =
     data && action === "Update"
@@ -56,20 +88,42 @@ const TransformationForm = ({
   return (
     <Form {...form}>
       <form className="space-y-8" onSubmit={form.handleSubmit(handleSubmit)}>
-        <FormField
+        <CustomField
           control={form.control}
           name="title"
+          formLabel="Image Title"
+          className="w-full"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Username</FormLabel>
-              <FormControl>
-                <Input placeholder="shadcn" {...field} />
-              </FormControl>
-
-              <FormMessage />
-            </FormItem>
+            <Input {...field} className="shadow-md input-field" />
           )}
         />
+        {/* Select Drop down */}
+        {type === "fill" && (
+          <CustomField
+            control={form.control}
+            name="aspectRatio"
+            formLabel="Aspect Ratio"
+            className="w-full"
+            render={({ field }) => (
+              <Select
+                onValueChange={(value) => {
+                  onSelectFieldHandler(value, field.onChange);
+                }}
+              >
+                <SelectTrigger className="select-field">
+                  <SelectValue placeholder="Select size" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.keys(aspectRatioOptions).map((key) => (
+                    <SelectItem key={key} value={key} className="select-item">
+                      {aspectRatioOptions[key as AspectRatioKey].label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
+        )}
         <Button type="submit">Submit</Button>
       </form>
     </Form>
