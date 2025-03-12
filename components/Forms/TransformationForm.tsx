@@ -28,7 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AspectRatioKey } from "@/lib/utils";
+import { AspectRatioKey, debounce } from "@/lib/utils";
 
 // This is the form schema defenition
 export const formSchema = z.object({
@@ -85,6 +85,26 @@ const TransformationForm = ({
     console.log(values);
   }
 
+  // On input change handler
+  const onInputChangeHandler = (
+    fieldName: string,
+    value: string,
+    type: string,
+    onChangeField: (value: string) => void
+  ) => {
+    debounce(() => {
+      setNewTransformation((prevState: any) => ({
+        ...prevState,
+        [type]: {
+          ...prevState?.[type],
+          [fieldName === "prompt" ? "prompt" : "to"]: value,
+        },
+      }));
+    }, 1000)();
+
+    return onChangeField(value);
+  };
+
   return (
     <Form {...form}>
       <form className="space-y-8" onSubmit={form.handleSubmit(handleSubmit)}>
@@ -115,7 +135,11 @@ const TransformationForm = ({
                 </SelectTrigger>
                 <SelectContent>
                   {Object.keys(aspectRatioOptions).map((key) => (
-                    <SelectItem key={key} value={key} className="select-item">
+                    <SelectItem
+                      key={key}
+                      value={key}
+                      className="select-item bg-accent"
+                    >
                       {aspectRatioOptions[key as AspectRatioKey].label}
                     </SelectItem>
                   ))}
@@ -124,6 +148,35 @@ const TransformationForm = ({
             )}
           />
         )}
+
+        {/* Fill and recolor field */}
+        {(type === "remove" || type === "recolor") && (
+          <div className="prompt-field">
+            <CustomField
+              control={form.control}
+              name="prompt"
+              formLabel={
+                type === "remove" ? "Object to remove" : "Object to recolor"
+              }
+              className="w-full"
+              render={({ field }) => (
+                <Input
+                  value={field.value}
+                  className="input-field"
+                  onChange={(e) =>
+                    onInputChangeHandler(
+                      "prompt",
+                      e.target.value,
+                      type,
+                      field.onChange
+                    )
+                  }
+                />
+              )}
+            />
+          </div>
+        )}
+
         <Button type="submit">Submit</Button>
       </form>
     </Form>
