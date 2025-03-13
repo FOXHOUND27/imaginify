@@ -174,6 +174,30 @@ const TransformationForm = ({
                 />
               )}
             />
+
+            {/* Recolor field */}
+            {type === "recolor" && (
+              <CustomField
+                control={form.control}
+                name="color"
+                formLabel="Replacement Color"
+                className="w-full"
+                render={({ field }) => (
+                  <Input
+                    value={field.value}
+                    className="input-field"
+                    onChange={(e) =>
+                      onInputChangeHandler(
+                        "color",
+                        e.target.value,
+                        "recolor",
+                        field.onChange
+                      )
+                    }
+                  />
+                )}
+              />
+            )}
           </div>
         )}
 
