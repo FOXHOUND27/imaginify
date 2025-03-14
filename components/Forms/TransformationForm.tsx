@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { startTransition, useState, useTransition } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { TransformationFormProps, Transformations } from "@/types";
 import {
   aspectRatioOptions,
+  creditFee,
   defaultValues,
   transformationTypes,
 } from "@/data/constants";
@@ -28,9 +29,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AspectRatioKey, debounce } from "@/lib/utils";
+import { AspectRatioKey, debounce, deepMergeObjects } from "@/lib/utils";
 import MediaUploader from "../shared/MediaUploader";
 import TransformedImage from "../shared/TransformedImage";
+import { updateCredits } from "@/lib/actions/user.actions";
 
 // This is the form schema defenition
 export const formSchema = z.object({
@@ -59,6 +61,7 @@ const TransformationForm = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newTransformation, setNewTransformation] =
     useState<Transformations | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   // Select field handler
   const onSelectFieldHandler = (
@@ -66,6 +69,17 @@ const TransformationForm = ({
     onChangeField: (value: string) => void
   ) => {
     const imageSize = aspectRatioOptions[value as AspectRatioKey];
+
+    setImage((prevState: any) => ({
+      ...prevState,
+      aspectRatio: imageSize.aspectRatio,
+      width: imageSize.width,
+      height: imageSize.height,
+    }));
+
+    setNewTransformation(transformationType.config);
+
+    return onChangeField(value);
   };
 
   // Default form values
@@ -90,6 +104,21 @@ const TransformationForm = ({
   async function handleSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
   }
+
+  // On Transform handler
+  const onTransformHandler = async () => {
+    setIsTransforming(true);
+
+    setTransformationConfig(
+      deepMergeObjects(newTransformation, transformationConfig)
+    );
+
+    setNewTransformation(null);
+
+    startTransition(async () => {
+      await updateCredits(userId, creditFee);
+    });
+  };
 
   // On input change handler
   const onInputChangeHandler = (
@@ -234,9 +263,23 @@ const TransformationForm = ({
           />
         </div>
 
-        <Button type="submit" className="submit-button capitalize">
-          Submit
-        </Button>
+        <div className="flex flex-col gap-4">
+          <Button
+            type="button"
+            className="submit-button capitalize"
+            disabled={isTransforming || newTransformation === null}
+            onClick={onTransformHandler}
+          >
+            {isTransforming ? "Transforming..." : "Apply Transformation"}
+          </Button>
+          <Button
+            type="submit"
+            className="submit-button capitalize"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Submitting..." : "Save Image"}
+          </Button>
+        </div>
       </form>
     </Form>
   );
