@@ -29,6 +29,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { AspectRatioKey, debounce } from "@/lib/utils";
+import MediaUploader from "../shared/MediaUploader";
+import TransformedImage from "../shared/TransformedImage";
 
 // This is the form schema defenition
 export const formSchema = z.object({
@@ -45,12 +47,16 @@ const TransformationForm = ({
   userId,
   type,
   creditBalance,
+  config = null,
 }: TransformationFormProps) => {
   // Getting Transformation Type
   const transformationType = transformationTypes[type];
 
-  // useState for image upload
+  // Stateful variables
   const [image, setImage] = useState(data);
+  const [isTransforming, setIsTransforming] = useState(false);
+  const [transformationConfig, setTransformationConfig] = useState(config);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [newTransformation, setNewTransformation] =
     useState<Transformations | null>(null);
 
@@ -201,7 +207,36 @@ const TransformationForm = ({
           </div>
         )}
 
-        <Button type="submit">Submit</Button>
+        {/* Media uploader field */}
+        <div className="media-uploader-field">
+          <CustomField
+            control={form.control}
+            name="publicId"
+            className="flex size-full flex-col"
+            render={({ field }) => (
+              <MediaUploader
+                onValueChange={field.onChange}
+                setImage={setImage}
+                publicId={field.value}
+                image={image}
+                type={type}
+              />
+            )}
+          />
+
+          <TransformedImage
+            image={image}
+            type={type}
+            title={form.getValues().title}
+            isTransforming={isTransforming}
+            setIsTransforming={setIsTransforming}
+            transformationConfig={transformationConfig}
+          />
+        </div>
+
+        <Button type="submit" className="submit-button capitalize">
+          Submit
+        </Button>
       </form>
     </Form>
   );
