@@ -28,6 +28,7 @@ import { updateCredits } from "@/lib/actions/user.actions";
 import { getCldImageUrl } from "next-cloudinary";
 import { addImage, updateImage } from "@/lib/actions/image.actions";
 import { useRouter } from "next/navigation";
+import { InsufficientCreditsModal } from "../shared/InsufficientCreditsModal";
 
 // This is the form schema defenition
 export const formSchema = z.object({
@@ -145,10 +146,10 @@ const TransformationForm = ({
           const updatedImage = await updateImage({
             image: {
               ...imageData,
-              _id: data._id,
+              _id: data?._id,
             },
             userId,
-            path: `/transformations/${data._id}`,
+            path: `/transformations/${data?._id}`,
           });
 
           if (updatedImage) {
@@ -200,6 +201,8 @@ const TransformationForm = ({
 
   return (
     <Form {...form}>
+      {/* Insuffiecient funds modal */}
+      {creditBalance < Math.abs(creditFee) && <InsufficientCreditsModal />}
       <form className="space-y-8" onSubmit={form.handleSubmit(handleSubmit)}>
         <CustomField
           control={form.control}
