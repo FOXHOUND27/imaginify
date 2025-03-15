@@ -151,7 +151,7 @@ const TransformationForm = ({
           const updatedImage = await updateImage({
             image: {
               ...imageData,
-              _id: data?._id,
+              _id: data?._id ?? "",
             },
             userId,
             path: `/transformations/${data?._id}`,

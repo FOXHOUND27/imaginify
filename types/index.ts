@@ -36,6 +36,7 @@ export type AddImageParams = {
 
 // Image type
 export interface Image extends Document {
+  _id: string | undefined;
   title: string;
   transformationType: string;
   publicId: string;
