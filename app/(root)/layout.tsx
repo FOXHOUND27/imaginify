@@ -11,7 +11,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
       <div className="root-container">
         <div className="wrapper">{children}</div>
       </div>
-      <Toaster position="top-center" />
+      <Toaster position="bottom-right" />
     </main>
   );
 };
