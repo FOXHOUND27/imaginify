@@ -4,15 +4,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { TransformationFormProps, Transformations } from "@/types";
 import {
@@ -33,6 +25,9 @@ import { AspectRatioKey, debounce, deepMergeObjects } from "@/lib/utils";
 import MediaUploader from "../shared/MediaUploader";
 import TransformedImage from "../shared/TransformedImage";
 import { updateCredits } from "@/lib/actions/user.actions";
+import { getCldImageUrl } from "next-cloudinary";
+import { addImage, updateImage } from "@/lib/actions/image.actions";
+import { useRouter } from "next/navigation";
 
 // This is the form schema defenition
 export const formSchema = z.object({
@@ -62,6 +57,7 @@ const TransformationForm = ({
   const [newTransformation, setNewTransformation] =
     useState<Transformations | null>(null);
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   // Select field handler
   const onSelectFieldHandler = (
@@ -102,7 +98,69 @@ const TransformationForm = ({
 
   // Handle submit function to handle form submit
   async function handleSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+    setIsSubmitting(true);
+
+    if (data || image) {
+      const transformationUrl = getCldImageUrl({
+        width: image?.width,
+        height: image?.height,
+        src: image?.publicId ?? "",
+        ...transformationConfig,
+      });
+
+      const imageData = {
+        title: values.title,
+        publicId: image?.publicId ?? "",
+        transformationType: type as string,
+        width: image?.width ?? 0,
+        height: image?.height ?? 0,
+        config: transformationConfig ?? null,
+        secureURL: image?.secureURL ?? "",
+        transformationURL: transformationUrl ?? "",
+        aspectRatio: values.aspectRatio,
+        prompt: values.prompt,
+        color: values.color,
+      };
+
+      if (action === "Add") {
+        try {
+          const newImage = await addImage({
+            image: imageData,
+            userId,
+            path: "/",
+          });
+
+          if (newImage) {
+            form.reset();
+            setImage(data);
+            router.push(`/transformations/${newImage._id}`);
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      }
+
+      if (action === "Update") {
+        try {
+          const updatedImage = await updateImage({
+            image: {
+              ...imageData,
+              _id: data._id,
+            },
+            userId,
+            path: `/transformations/${data._id}`,
+          });
+
+          if (updatedImage) {
+            router.push(`/transformations/${updatedImage._id}`);
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      }
+    }
+
+    setIsSubmitting(false);
   }
 
   // On Transform handler

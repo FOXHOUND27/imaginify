@@ -1,6 +1,6 @@
 "use client";
 
-import { toast } from "sonner";
+import { toast } from "react-hot-toast";
 import { dataUrl, getImageSize } from "@/lib/utils";
 import { CldImage, CldUploadWidget } from "next-cloudinary";
 import { PlaceholderValue } from "next/dist/shared/lib/get-img-props";
@@ -33,16 +33,17 @@ const MediaUploader = ({
 
     onValueChange(result?.info?.public_id);
 
-    toast("Image uploaded successfully", {
-      description: "1 credit was deducted from your account",
-      duration: 5000,
-      className: "success-toast",
-    });
+    toast.success(
+      "Image uploaded successfully and 1 credit has been deducted from your account",
+      {
+        duration: 5000,
+        className: "success-toast",
+      }
+    );
   };
 
   const onUploadErrorHandler = () => {
-    toast("Something went wrong while uploading", {
-      description: "Please try again",
+    toast.error("Something went wrong while uploading , please try again", {
       duration: 5000,
       className: "error-toast",
     });
